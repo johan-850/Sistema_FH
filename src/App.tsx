@@ -11,6 +11,7 @@ import LoginPage from './pages/auth/LoginPage'
 // Pages – Admin
 import DashboardPage  from './pages/admin/DashboardPage'
 import ProductsPage   from './pages/admin/ProductsPage'
+import ResourcesPage  from './pages/admin/ResourcesPage'
 
 // Pages – Cashier
 import OpenRegisterPage from './pages/cashier/OpenRegisterPage'
@@ -50,7 +51,7 @@ export default function App() {
         <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminLayout /></ProtectedRoute>}>
           <Route index         element={<DashboardPage />} />
           <Route path="products"  element={<ProductsPage />} />
-          <Route path="resources" element={<Placeholder title="Gestión de Recursos" />} />
+          <Route path="resources" element={<ResourcesPage />} />
           <Route path="inventory" element={<Placeholder title="Inventario" />} />
           <Route path="history"   element={<Placeholder title="Historial de Movimientos" />} />
           <Route path="users"     element={<Placeholder title="Gestión de Usuarios" />} />
