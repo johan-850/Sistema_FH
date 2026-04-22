@@ -1,0 +1,38 @@
+/* Shared style tokens as CSS vars – usable anywhere via style={{ color: 'var(--c-primary)' }} */
+:root {
+  --c-primary:            #67558c;
+  --c-on-primary:         #ffffff;
+  --c-primary-container:  #b19cd9;
+  --c-primary-fixed:      #ebddff;
+  --c-primary-dim:        #d2bcfb;
+
+  --c-secondary:          #864d61;
+  --c-on-secondary:       #ffffff;
+  --c-secondary-container:#fdb5cc;
+  --c-secondary-fixed:    #ffd9e3;
+
+  --c-tertiary:           #30628a;
+  --c-tertiary-container: #7babd6;
+  --c-tertiary-fixed:     #cde5ff;
+  --c-on-tertiary-fixed:  #001d32;
+
+  --c-error:              #ba1a1a;
+  --c-error-container:    #ffdad6;
+  --c-on-error-container: #93000a;
+
+  --c-surface:            #fef8fd;
+  --c-surface-low:        #f8f2f7;
+  --c-surface-container:  #f2ecf2;
+  --c-surface-high:       #ece6ec;
+  --c-surface-variant:    #e6e1e6;
+
+  --c-on-surface:         #1d1b1f;
+  --c-on-surface-var:     #49454f;
+  --c-outline:            #7a757f;
+  --c-outline-var:        #cbc4d0;
+  --c-background:         #fef8fd;
+
+  --shadow-glass:   0 8px 32px rgba(177,156,217,.18);
+  --shadow-card:    0 4px 24px rgba(177,156,217,.14);
+  --shadow-primary: 0 8px 24px rgba(103,85,140,.35);
+}
