@@ -4,6 +4,7 @@ import { AdminLayout }   from './components/layout/AdminLayout'
 import { CashierLayout } from './components/layout/CashierLayout'
 import { ProtectedRoute } from './components/shared/ProtectedRoute'
 import { RequireOpenRegister } from './components/shared/RequireOpenRegister'
+import { useAuthInit } from './hooks/useAuthInit'
 
 // Pages – Auth
 import LoginPage from './pages/auth/LoginPage'
@@ -33,6 +34,7 @@ function Placeholder({ title }: { title: string }) {
 }
 
 export default function App() {
+  useAuthInit() // ← Inicializa sesión de Supabase al arrancar
   return (
     <BrowserRouter>
       <Toaster position="top-right" richColors

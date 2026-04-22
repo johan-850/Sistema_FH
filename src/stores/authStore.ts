@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { supabase } from '../lib/supabase'
 import type { Profile, UserRole } from '../types/database'
 
 interface AuthState {
@@ -9,7 +10,7 @@ interface AuthState {
   setUser: (user: { id: string; email: string } | null) => void
   setProfile: (profile: Profile | null) => void
   setLoading: (loading: boolean) => void
-  logout: () => void
+  logout: () => Promise<void>
   hasRole: (role: UserRole) => boolean
 }
 
@@ -23,7 +24,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setProfile: (profile) => set({ profile }),
   setLoading: (isLoading) => set({ isLoading }),
 
-  logout: () => set({ user: null, profile: null, isAuthenticated: false }),
+  logout: async () => {
+    await supabase.auth.signOut()
+    set({ user: null, profile: null, isAuthenticated: false })
+  },
 
   hasRole: (role) => {
     const { profile } = get()
