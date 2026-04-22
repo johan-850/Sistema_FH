@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# GelatoFlow - POS & Gestión de Heladería 🍦
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema web Premium para la administración de ventas, control de inventario y gestión de cajeros, diseñado específicamente para heladerías.
 
-Currently, two official plugins are available:
+## Tecnologías Utilizadas
+- **Frontend**: React 18, TypeScript, Vite
+- **Estilos**: Tailwind CSS v4, CSS Tokens, Diseño Glassmorphism
+- **Estado**: Zustand
+- **Rutas**: React Router v7
+- **Iconos**: Lucide React
+- **Impresión**: react-to-print
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Estructura del Sistema
 
-## React Compiler
+El sistema se divide en dos módulos principales según el rol del usuario:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Módulo de Cajero (`/cashier`)
+- **Apertura de Caja**: Arqueo inicial, conteo de denominaciones.
+- **POS (Punto de Venta)**: Gestión simultánea de mesas, toma de pedidos con carrito y persistencia en memoria local.
+- **Checkout**: Interfaz optimizada para pagos (Efectivo, Tarjeta, Transferencia), cálculo de cambio automático e impresión de ticket.
+- **Gastos**: Registro de salidas de dinero durante el turno con impresión de comprobante.
+- **Cierre de Caja**: Conciliación final, resumen de ganancias del turno, conteo físico vs esperado.
 
-## Expanding the ESLint configuration
+### 2. Módulo de Administrador (`/admin`)
+- **Gestión de Productos**: *(Implementado)*
+  - CRUD completo de productos del menú.
+  - Asignación de categorías (Helados, Toppings, Bebidas, Postres).
+  - Control de precio, stock actual, unidad de medida.
+  - Filtros en tiempo real, búsqueda y activación/desactivación dinámica.
+- **Gestión de Recursos/Insumos**: *(Pendiente)*
+- **Inventario**: *(Pendiente)*
+- **Historial de Movimientos**: *(Pendiente)*
+- **Gestión de Usuarios**: *(Pendiente)*
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Diseño y UX
+Se ha construido un diseño exclusivo **Pastel Glassmorphism**, caracterizado por:
+- Desenfoques de fondo (`backdrop-filter: blur()`).
+- Gradientes en tonos pastel.
+- Micro-animaciones en interacciones (hover, presionar).
+- Diálogos personalizados y notificaciones interactivas (`sonner`).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Ejecución Local
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Instalar dependencias:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Levantar servidor de desarrollo:
+```bash
+npm run dev
 ```
+
+El proyecto se servirá por defecto en `http://localhost:5173`.
+
+## Ramas de Desarrollo
+- `main`: Entorno principal / Producción.
+- `develop`: Entorno de desarrollo / Staging.
+- `modulos-admin`: Implementación actual de los módulos de administración.
