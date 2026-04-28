@@ -16,7 +16,7 @@ El sistema se divide en dos módulos principales según el rol del usuario:
 
 ### 1. Módulo de Cajero (`/cashier`)
 - **Apertura de Caja**: Arqueo inicial, conteo de denominaciones.
-- **POS (Punto de Venta)**: Gestión simultánea de mesas, toma de pedidos con carrito y persistencia en memoria local.
+- **POS (Punto de Venta)**: Gestión simultánea de mesas, toma de pedidos con carrito y conexión en tiempo real con Supabase (catálogo real).
 - **Checkout**: Interfaz optimizada para pagos (Efectivo, Tarjeta, Transferencia), cálculo de cambio automático e impresión de ticket.
 - **Gastos**: Registro de salidas de dinero durante el turno con impresión de comprobante.
 - **Cierre de Caja**: Conciliación final, resumen de ganancias del turno, conteo físico vs esperado.
@@ -27,7 +27,9 @@ El sistema se divide en dos módulos principales según el rol del usuario:
   - Asignación de categorías (Helados, Toppings, Bebidas, Postres).
   - Control de precio, stock actual, unidad de medida.
   - Filtros en tiempo real, búsqueda y activación/desactivación dinámica.
-- **Gestión de Recursos/Insumos**: *(Pendiente)*
+- **Gestión de Recursos/Insumos**: *(Implementado)*
+  - CRUD de materias primas y control de métricas de stock.
+  - Alertas visuales de stock bajo y agotado.
 - **Inventario**: *(Pendiente)*
 - **Historial de Movimientos**: *(Pendiente)*
 - **Gestión de Usuarios**: *(Pendiente)*
