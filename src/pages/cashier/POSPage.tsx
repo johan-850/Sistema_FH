@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Plus, Minus, Trash2, MessageSquare, ShoppingCart, RotateCcw, Save, Clock } from 'lucide-react'
 import { useCartStore } from '../../stores/cartStore'
 import { useTableOrdersStore } from '../../stores/tableOrdersStore'
@@ -7,32 +7,8 @@ import { S } from '../../lib/styles'
 import { CheckoutModal } from './CheckoutModal'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { toast } from 'sonner'
+import { supabase } from '../../lib/supabase'
 import type { Product } from '../../types/database'
-
-/* ─── Demo data ─── */
-const CATEGORIES = [
-  { id:'1', name:'Helados',  icon:'🍦' },
-  { id:'2', name:'Toppings', icon:'🍫' },
-  { id:'3', name:'Bebidas',  icon:'🥤' },
-  { id:'4', name:'Postres',  icon:'🍰' },
-]
-
-const PRODUCTS: Product[] = [
-  { id:'p1',  category_id:'1', name:'Fresa Suprema',    description:'Helado artesanal de fresa',    price:4.50, image_url:null, is_active:true, stock_quantity:100, unit:'bola',    created_at:'' },
-  { id:'p2',  category_id:'1', name:'Menta Fresca',     description:'Menta con chips de chocolate', price:4.50, image_url:null, is_active:true, stock_quantity:80,  unit:'bola',    created_at:'' },
-  { id:'p3',  category_id:'1', name:'Choco Oscuro',     description:'Chocolate belga 70%',          price:5.00, image_url:null, is_active:true, stock_quantity:90,  unit:'bola',    created_at:'' },
-  { id:'p4',  category_id:'1', name:'Vainilla Clásica', description:'Vainilla de Madagascar',       price:4.00, image_url:null, is_active:true, stock_quantity:120, unit:'bola',    created_at:'' },
-  { id:'p5',  category_id:'1', name:'Mora Salvaje',     description:'Mora silvestre natural',       price:4.75, image_url:null, is_active:true, stock_quantity:70,  unit:'bola',    created_at:'' },
-  { id:'p6',  category_id:'1', name:'Pistache Dream',   description:'Pistache premium siciliano',   price:5.50, image_url:null, is_active:true, stock_quantity:60,  unit:'bola',    created_at:'' },
-  { id:'p7',  category_id:'2', name:'Chispas Choco',    description:null,                           price:1.50, image_url:null, is_active:true, stock_quantity:200, unit:'porción', created_at:'' },
-  { id:'p8',  category_id:'2', name:'Caramelo Salado',  description:null,                           price:1.00, image_url:null, is_active:true, stock_quantity:150, unit:'porción', created_at:'' },
-  { id:'p9',  category_id:'2', name:'Nueces Tostadas',  description:null,                           price:1.50, image_url:null, is_active:true, stock_quantity:120, unit:'porción', created_at:'' },
-  { id:'p10', category_id:'3', name:'Agua Natural',     description:null,                           price:1.50, image_url:null, is_active:true, stock_quantity:300, unit:'botella', created_at:'' },
-  { id:'p11', category_id:'3', name:'Malteada',         description:'Fresa, choco o vainilla',      price:6.00, image_url:null, is_active:true, stock_quantity:50,  unit:'vaso',    created_at:'' },
-  { id:'p12', category_id:'3', name:'Limonada Natural', description:'Con menta y jengibre',         price:3.50, image_url:null, is_active:true, stock_quantity:80,  unit:'vaso',    created_at:'' },
-  { id:'p13', category_id:'4', name:'Brownie',          description:'Con helado de vainilla',       price:7.00, image_url:null, is_active:true, stock_quantity:40,  unit:'porción', created_at:'' },
-  { id:'p14', category_id:'4', name:'Crepe de Fresa',   description:'Con crema chantilly',          price:6.50, image_url:null, is_active:true, stock_quantity:35,  unit:'porción', created_at:'' },
-]
 
 const BASE_TABLES = [
   { id:'t1', number:1 }, { id:'t2', number:2 }, { id:'t3', number:3 },
@@ -59,13 +35,30 @@ function elapsedMinutes(isoDate: string): string {
 
 /* ═══════════════════════════════════════ */
 export default function POSPage() {
-  const [cat,      setCat]      = useState('1')
+  // Real data from Supabase
+  const [categories,   setCategories]   = useState<{ id: string; name: string; icon: string }[]>([])
+  const [allProducts,  setAllProducts]  = useState<Product[]>([])
+
+  const [cat,      setCat]      = useState('')
   const [tableId,  setTableId]  = useState<string | null>(null)
   const [checkout, setCheckout] = useState(false)
   const [noteFor,  setNoteFor]  = useState<string | null>(null)
   const [saving,   setSaving]   = useState(false)
-  const [confirmSwitch, setConfirmSwitch] = useState<string | null>(null) // target tableId
+  const [confirmSwitch, setConfirmSwitch] = useState<string | null>(null)
   const noteRef = useRef<HTMLInputElement>(null)
+
+  const fetchCatalog = useCallback(async () => {
+    const [{ data: cats }, { data: prods }] = await Promise.all([
+      supabase.from('categories').select('id, name, icon').eq('is_active', true).order('name'),
+      supabase.from('products').select('*').eq('is_active', true).order('name'),
+    ])
+    setCategories(cats ?? [])
+    setAllProducts(prods ?? [])
+    if (cats && cats.length > 0) setCat(cats[0].id)
+  }, [])
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchCatalog() }, [fetchCatalog])
 
   /* Stores */
   const { items, addItem, removeItem, updateQuantity, updateNotes, clearCart,
@@ -136,11 +129,10 @@ export default function POSPage() {
   }
 
   /* ─── Derived ─── */
-  const products  = PRODUCTS.filter(p => p.category_id === cat)
-  const tableNum  = BASE_TABLES.find(t => t.id === tableId)?.number
-  const itemCount = items.reduce((s, i) => s + i.quantity, 0)
+  const products   = allProducts.filter(p => p.category_id === cat)
+  const tableNum   = BASE_TABLES.find(t => t.id === tableId)?.number
   const savedOrder = tableId ? getOrder(tableId) : null
-  const isDirty   = items.length > 0  // cart has unsaved changes
+  const isDirty    = items.length > 0  // cart has unsaved changes
 
   /* Order number: use saved if exists, otherwise pending */
   const orderNum = savedOrder ? `#${savedOrder.orderNumber}` : (isDirty ? '#NUEVO' : '---')
@@ -210,7 +202,7 @@ export default function POSPage() {
       <section className="flex-1 flex flex-col gap-3 min-w-0">
         {/* Category tabs */}
         <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1 shrink-0">
-          {CATEGORIES.map(c => (
+          {categories.map(c => (
             <button key={c.id} onClick={() => setCat(c.id)}
               className="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0"
               style={cat === c.id

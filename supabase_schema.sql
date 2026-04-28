@@ -197,3 +197,6 @@ CREATE POLICY "Cajeros gestionan sus propias sesiones"
 ON cash_register_sessions FOR ALL USING (
   cashier_id = auth.uid() OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
+
+-- Políticas para Categorías
+  

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, IceCreamCone, Layers, Package, History, Users, Settings, HelpCircle, LogOut, PlusCircle, Receipt, Lock, Unlock } from 'lucide-react'
+import { LayoutDashboard, IceCreamCone, Layers, Package, History, Users, Settings, HelpCircle, LogOut, Receipt, Lock, Unlock } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useCashRegisterStore } from '../../stores/cashRegisterStore'
 

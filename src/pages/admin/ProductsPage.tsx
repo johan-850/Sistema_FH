@@ -9,15 +9,13 @@ import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import type { Product, Category } from '../../types/database'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { Portal } from '../../components/ui/Portal'
 
 const emptyForm = {
   name: '', description: '', price: '', category_id: '',
   stock_quantity: '', unit: 'unidad', is_active: true,
 }
 
-const catColor: Record<string, string> = {
-  default: 'rgba(235,221,255,0.35)',
-}
 
 function getCatColor(idx: number) {
   const COLORS = [
@@ -43,6 +41,10 @@ export default function ProductsPage() {
   const [saving,       setSaving]       = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
 
+  const [showCatForm,  setShowCatForm]  = useState(false)
+  const [catForm,      setCatForm]      = useState({ name: '', icon: '🍦' })
+  const [savingCat,    setSavingCat]    = useState(false)
+
   // ── Fetch ──
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -58,6 +60,7 @@ export default function ProductsPage() {
     setLoading(false)
   }, []) // eslint-disable-line
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData() }, [fetchData])
 
   // ── Derived list ──
@@ -128,6 +131,27 @@ export default function ProductsPage() {
     await fetchData()
     setSaving(false)
     setShowForm(false)
+  }
+
+  // ── Save Category ──
+  const saveCategory = async () => {
+    if (!catForm.name.trim()) { toast.error('Ingresa un nombre para la categoría'); return }
+    setSavingCat(true)
+    const { data, error } = await supabase.from('categories').insert({
+      name: catForm.name.trim(),
+      icon: catForm.icon || '📦',
+      color: 'rgba(235,221,255,0.35)',
+      is_active: true
+    }).select().single()
+
+    if (error) { toast.error('Error al crear categoría: ' + error.message); setSavingCat(false); return }
+
+    toast.success('Categoría creada')
+    setCategories(prev => [...prev, data])
+    setForm(p => ({ ...p, category_id: data.id }))
+    setShowCatForm(false)
+    setCatForm({ name: '', icon: '🍦' })
+    setSavingCat(false)
   }
 
   // ── Toggle active ──
@@ -233,7 +257,7 @@ export default function ProductsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((p, idx) => {
+          {filtered.map((p) => {
             const bg = getCatColor(categories.findIndex(c => c.id === p.category_id))
             return (
               <div key={p.id}
@@ -300,102 +324,148 @@ export default function ProductsPage() {
 
       {/* ── Product Form Modal ── */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
-             style={S.modalOverlay} onClick={() => setShowForm(false)}>
-          <div className="fixed w-96 h-96 rounded-full pointer-events-none"
-               style={{ background:'radial-gradient(circle,rgba(177,156,217,0.3) 0%,transparent 70%)', filter:'blur(80px)', top:'-5%', right:'10%' }}/>
-          <div className="w-full max-w-lg rounded-[28px] overflow-hidden animate-fade-in-scale"
-               style={{ ...S.glassPanel, maxHeight:'90vh', overflowY:'auto' }}
-               onClick={e => e.stopPropagation()}>
-            <div className="h-1 w-full" style={{ background:'linear-gradient(90deg,#67558c,#864d61,#30628a)' }}/>
-            <div className="p-7">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-black" style={S.onSurface}>
-                  {editing ? '✏️ Editar Producto' : '🆕 Nuevo Producto'}
-                </h2>
-                <button onClick={() => setShowForm(false)} className="p-2 rounded-full cursor-pointer hover:bg-black/5">
-                  <X size={18} style={S.muted}/>
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold block mb-1.5" style={S.muted}>Nombre *</label>
-                  <input value={form.name} onChange={e => setForm(p=>({...p, name:e.target.value}))}
-                    placeholder="Ej: Fresa Suprema" className="w-full" style={S.input}/>
-                </div>
-                <div>
-                  <label className="text-xs font-bold block mb-1.5" style={S.muted}>Descripción</label>
-                  <textarea value={form.description} onChange={e => setForm(p=>({...p, description:e.target.value}))}
-                    rows={2} placeholder="Descripción breve..." style={S.textarea}/>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Precio ($) *</label>
-                    <input type="number" min="0.01" step="0.01" value={form.price}
-                      onChange={e => setForm(p=>({...p, price:e.target.value}))}
-                      placeholder="0.00" className="w-full" style={S.input}/>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Stock *</label>
-                    <input type="number" min="0" value={form.stock_quantity}
-                      onChange={e => setForm(p=>({...p, stock_quantity:e.target.value}))}
-                      placeholder="0" className="w-full" style={S.input}/>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Unidad</label>
-                    <div className="relative">
-                      <select value={form.unit} onChange={e => setForm(p=>({...p, unit:e.target.value}))}
-                        className="appearance-none w-full text-sm font-semibold cursor-pointer outline-none pr-8"
-                        style={S.input}>
-                        {['unidad','porción','vaso','litro','kg','gramo'].map(u => <option key={u}>{u}</option>)}
-                      </select>
-                      <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={S.muted}/>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Categoría</label>
-                    <div className="relative">
-                      <select value={form.category_id} onChange={e => setForm(p=>({...p, category_id:e.target.value}))}
-                        className="appearance-none w-full text-sm font-semibold cursor-pointer outline-none pr-8"
-                        style={S.input}>
-                        {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                      </select>
-                      <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={S.muted}/>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-2xl"
-                     style={{ background:'rgba(255,255,255,0.5)', border:'1px solid rgba(255,255,255,0.7)' }}>
-                  <div>
-                    <p className="text-sm font-bold" style={S.onSurface}>Disponible para venta</p>
-                    <p className="text-xs" style={S.muted}>El producto aparecerá en el POS</p>
-                  </div>
-                  <button onClick={() => setForm(p=>({...p, is_active:!p.is_active}))} className="cursor-pointer hover:scale-110 transition-all">
-                    {form.is_active
-                      ? <ToggleRight size={36} style={{ color:'#15803d' }}/>
-                      : <ToggleLeft  size={36} style={S.muted}/>
-                    }
+        <Portal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+               style={S.modalOverlay} onClick={() => setShowForm(false)}>
+            <div className="fixed w-96 h-96 rounded-full pointer-events-none"
+                 style={{ background:'radial-gradient(circle,rgba(177,156,217,0.3) 0%,transparent 70%)', filter:'blur(80px)', top:'-5%', right:'10%' }}/>
+            <div className="w-full max-w-lg rounded-[28px] overflow-hidden animate-fade-in-scale"
+                 style={{ ...S.glassPanel, maxHeight:'90vh', overflowY:'auto' }}
+                 onClick={e => e.stopPropagation()}>
+              <div className="h-1 w-full" style={{ background:'linear-gradient(90deg,#67558c,#864d61,#30628a)' }}/>
+              <div className="p-7">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-black" style={S.onSurface}>
+                    {editing ? '✏️ Editar Producto' : '🆕 Nuevo Producto'}
+                  </h2>
+                  <button onClick={() => setShowForm(false)} className="p-2 rounded-full cursor-pointer hover:bg-black/5">
+                    <X size={18} style={S.muted}/>
                   </button>
                 </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Nombre *</label>
+                    <input value={form.name} onChange={e => setForm(p=>({...p, name:e.target.value}))}
+                      placeholder="Ej: Fresa Suprema" className="w-full" style={S.input}/>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Descripción</label>
+                    <textarea value={form.description} onChange={e => setForm(p=>({...p, description:e.target.value}))}
+                      rows={2} placeholder="Descripción breve..." style={S.textarea}/>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold block mb-1.5" style={S.muted}>Precio ($) *</label>
+                      <input type="number" min="0.01" step="0.01" value={form.price}
+                        onChange={e => setForm(p=>({...p, price:e.target.value}))}
+                        placeholder="0.00" className="w-full" style={S.input}/>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold block mb-1.5" style={S.muted}>Stock *</label>
+                      <input type="number" min="0" value={form.stock_quantity}
+                        onChange={e => setForm(p=>({...p, stock_quantity:e.target.value}))}
+                        placeholder="0" className="w-full" style={S.input}/>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold block mb-1.5" style={S.muted}>Unidad</label>
+                      <div className="relative">
+                        <select value={form.unit} onChange={e => setForm(p=>({...p, unit:e.target.value}))}
+                          className="appearance-none w-full text-sm font-semibold cursor-pointer outline-none pr-8"
+                          style={S.input}>
+                          {['unidad','porción','vaso','litro','kg','gramo'].map(u => <option key={u}>{u}</option>)}
+                        </select>
+                        <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={S.muted}/>
+                      </div>
+                    </div>
+                    <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold block" style={S.muted}>Categoría</label>
+                      <button type="button" onClick={() => setShowCatForm(true)} className="text-[10px] font-bold px-2 py-0.5 rounded-full hover:opacity-80 cursor-pointer" style={{ background:'var(--c-primary-fixed)', color:'var(--c-primary)' }}>+ Nueva</button>
+                    </div>
+                    <div className="relative">
+                        <select value={form.category_id || ''} onChange={e => setForm(p=>({...p, category_id:e.target.value}))}
+                          className="appearance-none w-full text-sm font-semibold cursor-pointer outline-none pr-8"
+                          style={S.input}>
+                          <option value="" disabled>
+                            {categories.length === 0 ? 'Sin categorías' : 'Selecciona...'}
+                          </option>
+                          {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                        </select>
+                        <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={S.muted}/>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-2xl"
+                       style={{ background:'rgba(255,255,255,0.5)', border:'1px solid rgba(255,255,255,0.7)' }}>
+                    <div>
+                      <p className="text-sm font-bold" style={S.onSurface}>Disponible para venta</p>
+                      <p className="text-xs" style={S.muted}>El producto aparecerá en el POS</p>
+                    </div>
+                    <button onClick={() => setForm(p=>({...p, is_active:!p.is_active}))} className="cursor-pointer hover:scale-110 transition-all">
+                      {form.is_active
+                        ? <ToggleRight size={36} style={{ color:'#15803d' }}/>
+                        : <ToggleLeft  size={36} style={S.muted}/>
+                      }
+                    </button>
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={() => setShowForm(false)}
+                      className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer hover:scale-105 transition-all"
+                      style={S.btnOutline}>Cancelar</button>
+                    <button onClick={save} disabled={saving}
+                      className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer hover:scale-105 transition-all flex items-center justify-center gap-2"
+                      style={S.btnPrimary}>
+                      {saving
+                        ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Guardando...</>
+                        : editing ? '✓ Actualizar' : '✓ Crear Producto'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* ── Category Form Modal ── */}
+      {showCatForm && (
+        <Portal>
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fade-in"
+               style={S.modalOverlay} onClick={() => setShowCatForm(false)}>
+            <div className="w-full max-w-sm rounded-[24px] p-6 animate-fade-in-scale"
+                 style={{ ...S.glassPanel, background:'rgba(255,255,255,0.98)' }}
+                 onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-black mb-4" style={S.onSurface}>Nueva Categoría</h3>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="w-20">
+                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Icono</label>
+                    <input value={catForm.icon} onChange={e => setCatForm(p=>({...p, icon:e.target.value}))}
+                      className="w-full text-center text-xl" style={S.input}/>
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-bold block mb-1.5" style={S.muted}>Nombre *</label>
+                    <input value={catForm.name} onChange={e => setCatForm(p=>({...p, name:e.target.value}))}
+                      placeholder="Ej: Helados" className="w-full" style={S.input}/>
+                  </div>
+                </div>
                 <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowForm(false)}
-                    className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer hover:scale-105 transition-all"
+                  <button onClick={() => setShowCatForm(false)}
+                    className="flex-1 py-2.5 rounded-full text-sm font-bold cursor-pointer transition-all hover:scale-105"
                     style={S.btnOutline}>Cancelar</button>
-                  <button onClick={save} disabled={saving}
-                    className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer hover:scale-105 transition-all flex items-center justify-center gap-2"
+                  <button onClick={saveCategory} disabled={savingCat}
+                    className="flex-1 py-2.5 rounded-full text-sm font-bold cursor-pointer transition-all hover:scale-105"
                     style={S.btnPrimary}>
-                    {saving
-                      ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Guardando...</>
-                      : editing ? '✓ Actualizar' : '✓ Crear Producto'}
+                    {savingCat ? '...' : 'Crear'}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       <ConfirmDialog

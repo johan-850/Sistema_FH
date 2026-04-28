@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react'
 import { S } from '../../lib/styles'
+import { Portal } from './Portal'
 
 type DialogVariant = 'warning' | 'danger' | 'info' | 'success'
 
@@ -72,64 +73,66 @@ export function ConfirmDialog({
   const v = VARIANTS[variant]
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-6 animate-fade-in"
-      style={S.modalOverlay}
-      onClick={onCancel}
-    >
-      {/* Ambient glow */}
-      <div className="absolute w-80 h-80 rounded-full pointer-events-none"
-           style={{ background: 'radial-gradient(circle, rgba(177,156,217,0.3) 0%, transparent 70%)', filter: 'blur(60px)', top: '20%', left: '35%' }} />
-
-      {/* Dialog card */}
+    <Portal>
       <div
-        className="relative w-full max-w-sm rounded-[28px] overflow-hidden animate-fade-in-scale"
-        style={{ ...S.glassPanel, boxShadow: '0 24px 60px rgba(103,85,140,0.25)' }}
-        onClick={e => e.stopPropagation()}
+        className="fixed inset-0 z-[60] flex items-center justify-center p-6 animate-fade-in"
+        style={S.modalOverlay}
+        onClick={onCancel}
       >
-        {/* Top accent bar */}
-        <div className="h-1 w-full"
-             style={{ background: 'linear-gradient(90deg, #67558c 0%, #864d61 50%, #30628a 100%)' }} />
+        {/* Ambient glow */}
+        <div className="absolute w-80 h-80 rounded-full pointer-events-none"
+             style={{ background: 'radial-gradient(circle, rgba(177,156,217,0.3) 0%, transparent 70%)', filter: 'blur(60px)', top: '20%', left: '35%' }} />
 
-        <div className="p-7">
-          {/* Icon */}
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 mx-auto"
-               style={{ background: v.iconBg, color: v.iconColor }}>
-            {v.icon}
+        {/* Dialog card */}
+        <div
+          className="relative w-full max-w-sm rounded-[28px] overflow-hidden animate-fade-in-scale"
+          style={{ ...S.glassPanel, boxShadow: '0 24px 60px rgba(103,85,140,0.25)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Top accent bar */}
+          <div className="h-1 w-full"
+               style={{ background: 'linear-gradient(90deg, #67558c 0%, #864d61 50%, #30628a 100%)' }} />
+
+          <div className="p-7">
+            {/* Icon */}
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 mx-auto"
+                 style={{ background: v.iconBg, color: v.iconColor }}>
+              {v.icon}
+            </div>
+
+            {/* Text */}
+            <h3 className="text-xl font-black text-center mb-2" style={S.onSurface}>{title}</h3>
+            <p className="text-sm text-center leading-relaxed" style={S.muted}>{message}</p>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-7">
+              <button
+                onClick={onCancel}
+                className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200"
+                style={S.btnOutline}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+              >
+                {cancelLabel}
+              </button>
+              <button
+                onClick={onConfirm}
+                className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200"
+                style={v.confirmStyle}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+              >
+                {confirmLabel}
+              </button>
+            </div>
+
+            {/* Keyboard hint */}
+            <p className="text-[10px] text-center mt-3" style={{ color: 'var(--c-outline)', opacity: 0.7 }}>
+              Enter para confirmar · Esc para cancelar
+            </p>
           </div>
-
-          {/* Text */}
-          <h3 className="text-xl font-black text-center mb-2" style={S.onSurface}>{title}</h3>
-          <p className="text-sm text-center leading-relaxed" style={S.muted}>{message}</p>
-
-          {/* Actions */}
-          <div className="flex gap-3 mt-7">
-            <button
-              onClick={onCancel}
-              className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200"
-              style={S.btnOutline}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-            >
-              {cancelLabel}
-            </button>
-            <button
-              onClick={onConfirm}
-              className="flex-1 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200"
-              style={v.confirmStyle}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-            >
-              {confirmLabel}
-            </button>
-          </div>
-
-          {/* Keyboard hint */}
-          <p className="text-[10px] text-center mt-3" style={{ color: 'var(--c-outline)', opacity: 0.7 }}>
-            Enter para confirmar · Esc para cancelar
-          </p>
         </div>
       </div>
-    </div>
+    </Portal>
   )
 }

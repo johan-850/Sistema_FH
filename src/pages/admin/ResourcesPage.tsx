@@ -50,6 +50,7 @@ export default function ResourcesPage() {
     setLoading(false)
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchResources() }, [fetchResources])
 
   const filtered = resources.filter(r => {
@@ -144,17 +145,19 @@ export default function ResourcesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Stock OK',        value: stockOk,                  color:'#15803d', bg:'rgba(220,252,231,0.6)', icon:'✅' },
-          { label: 'Stock bajo',      value: stockLow,                 color:'#b45309', bg:'rgba(254,243,199,0.6)', icon:'⚠️' },
-          { label: 'Sin stock',       value: stockCritical,            color:'#b91c1c', bg:'rgba(254,202,202,0.6)', icon:'🚨' },
-          { label: 'Valor en bodega', value: formatCurrency(totalValue),color:'#1d4ed8', bg:'rgba(219,234,254,0.6)', icon:'💰', isText: true },
-        ].map((s, i) => (
+        {(
+          [
+            { label: 'Stock OK',        value: stockOk,                   color:'#15803d', bg:'rgba(220,252,231,0.6)', icon:'✅',  isText: false },
+            { label: 'Stock bajo',      value: stockLow,                  color:'#b45309', bg:'rgba(254,243,199,0.6)', icon:'⚠️', isText: false },
+            { label: 'Sin stock',       value: stockCritical,             color:'#b91c1c', bg:'rgba(254,202,202,0.6)', icon:'🚨', isText: false },
+            { label: 'Valor en bodega', value: formatCurrency(totalValue), color:'#1d4ed8', bg:'rgba(219,234,254,0.6)', icon:'💰', isText: true  },
+          ] as { label: string; value: string | number; color: string; bg: string; icon: string; isText: boolean }[]
+        ).map((s, i) => (
           <div key={i} className="rounded-2xl p-4 flex items-center gap-3"
                style={{ background: s.bg, border:'1px solid rgba(255,255,255,0.6)', boxShadow:'var(--shadow-card)' }}>
             <span className="text-2xl">{s.icon}</span>
             <div>
-              <p className={`font-black leading-none ${(s as any).isText ? 'text-base' : 'text-2xl'}`} style={{ color: s.color }}>{s.value}</p>
+              <p className={`font-black leading-none ${s.isText ? 'text-base' : 'text-2xl'}`} style={{ color: s.color }}>{s.value}</p>
               <p className="text-xs font-semibold mt-0.5" style={S.muted}>{s.label}</p>
             </div>
           </div>
