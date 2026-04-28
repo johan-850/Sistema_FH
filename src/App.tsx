@@ -4,12 +4,15 @@ import { AdminLayout }   from './components/layout/AdminLayout'
 import { CashierLayout } from './components/layout/CashierLayout'
 import { ProtectedRoute } from './components/shared/ProtectedRoute'
 import { RequireOpenRegister } from './components/shared/RequireOpenRegister'
+import { useAuthInit } from './hooks/useAuthInit'
 
 // Pages – Auth
 import LoginPage from './pages/auth/LoginPage'
 
 // Pages – Admin
-import DashboardPage from './pages/admin/DashboardPage'
+import DashboardPage  from './pages/admin/DashboardPage'
+import ProductsPage   from './pages/admin/ProductsPage'
+import ResourcesPage  from './pages/admin/ResourcesPage'
 
 // Pages – Cashier
 import OpenRegisterPage from './pages/cashier/OpenRegisterPage'
@@ -31,6 +34,7 @@ function Placeholder({ title }: { title: string }) {
 }
 
 export default function App() {
+  useAuthInit() // ← Inicializa sesión de Supabase al arrancar
   return (
     <BrowserRouter>
       <Toaster position="top-right" richColors
@@ -48,8 +52,8 @@ export default function App() {
         {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminLayout /></ProtectedRoute>}>
           <Route index         element={<DashboardPage />} />
-          <Route path="products"  element={<Placeholder title="Gestión de Productos" />} />
-          <Route path="resources" element={<Placeholder title="Gestión de Recursos" />} />
+          <Route path="products"  element={<ProductsPage />} />
+          <Route path="resources" element={<ResourcesPage />} />
           <Route path="inventory" element={<Placeholder title="Inventario" />} />
           <Route path="history"   element={<Placeholder title="Historial de Movimientos" />} />
           <Route path="users"     element={<Placeholder title="Gestión de Usuarios" />} />
