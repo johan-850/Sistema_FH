@@ -10,9 +10,13 @@ import { useAuthInit } from './hooks/useAuthInit'
 import LoginPage from './pages/auth/LoginPage'
 
 // Pages – Admin
-import DashboardPage  from './pages/admin/DashboardPage'
-import ProductsPage   from './pages/admin/ProductsPage'
-import ResourcesPage  from './pages/admin/ResourcesPage'
+import DashboardPage   from './pages/admin/DashboardPage'
+import ProductsPage    from './pages/admin/ProductsPage'
+import ResourcesPage   from './pages/admin/ResourcesPage'
+import CategoriesPage  from './pages/admin/CategoriesPage'
+import InventoryPage   from './pages/admin/InventoryPage'
+import HistoryPage     from './pages/admin/HistoryPage'
+import UsersPage       from './pages/admin/UsersPage'
 
 // Pages – Cashier
 import OpenRegisterPage from './pages/cashier/OpenRegisterPage'
@@ -20,18 +24,8 @@ import POSPage          from './pages/cashier/POSPage'
 import ExpensesPage     from './pages/cashier/ExpensesPage'
 import CloseRegisterPage from './pages/cashier/CloseRegisterPage'
 
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex items-center justify-center h-96 animate-fade-in">
-      <div className="text-center p-12 rounded-[28px]"
-           style={{ background:'rgba(255,255,255,0.6)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.6)' }}>
-        <span className="text-5xl mb-4 block">🚧</span>
-        <h2 className="text-2xl font-black mb-2" style={{ color:'var(--c-on-surface)' }}>{title}</h2>
-        <p className="text-sm" style={{ color:'var(--c-on-surface-var)' }}>Módulo en desarrollo · Próximamente</p>
-      </div>
-    </div>
-  )
-}
+
+
 
 export default function App() {
   useAuthInit() // ← Inicializa sesión de Supabase al arrancar
@@ -51,12 +45,13 @@ export default function App() {
 
         {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminLayout /></ProtectedRoute>}>
-          <Route index         element={<DashboardPage />} />
-          <Route path="products"  element={<ProductsPage />} />
-          <Route path="resources" element={<ResourcesPage />} />
-          <Route path="inventory" element={<Placeholder title="Inventario" />} />
-          <Route path="history"   element={<Placeholder title="Historial de Movimientos" />} />
-          <Route path="users"     element={<Placeholder title="Gestión de Usuarios" />} />
+          <Route index              element={<DashboardPage />} />
+          <Route path="products"   element={<ProductsPage />} />
+          <Route path="resources"  element={<ResourcesPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="inventory"  element={<InventoryPage />} />
+          <Route path="history"    element={<HistoryPage />} />
+          <Route path="users"      element={<UsersPage />} />
         </Route>
 
         {/* Cashier */}

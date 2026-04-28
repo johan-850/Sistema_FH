@@ -1,17 +1,18 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, IceCreamCone, Layers, Package, History, Users, Settings, HelpCircle, LogOut, Receipt, Lock, Unlock } from 'lucide-react'
+import { LayoutDashboard, IceCreamCone, Layers, Package, History, Users, Settings, HelpCircle, LogOut, Receipt, Lock, Unlock, Tag } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { useCashRegisterStore } from '../../stores/cashRegisterStore'
 
 interface NavItem { to: string; icon: React.ReactNode; label: string }
 
 const adminNav: NavItem[] = [
-  { to:'/admin',           icon:<LayoutDashboard size={18}/>, label:'Dashboard'  },
-  { to:'/admin/products',  icon:<IceCreamCone    size={18}/>, label:'Productos'  },
-  { to:'/admin/resources', icon:<Layers          size={18}/>, label:'Recursos'   },
-  { to:'/admin/inventory', icon:<Package         size={18}/>, label:'Inventario' },
-  { to:'/admin/history',   icon:<History         size={18}/>, label:'Historial'  },
-  { to:'/admin/users',     icon:<Users           size={18}/>, label:'Usuarios'   },
+  { to:'/admin',            icon:<LayoutDashboard size={18}/>, label:'Dashboard'   },
+  { to:'/admin/products',   icon:<IceCreamCone    size={18}/>, label:'Productos'   },
+  { to:'/admin/categories', icon:<Tag             size={18}/>, label:'Categorías'  },
+  { to:'/admin/resources',  icon:<Layers          size={18}/>, label:'Recursos'    },
+  { to:'/admin/inventory',  icon:<Package         size={18}/>, label:'Inventario'  },
+  { to:'/admin/history',    icon:<History         size={18}/>, label:'Historial'   },
+  { to:'/admin/users',      icon:<Users           size={18}/>, label:'Usuarios'    },
 ]
 
 const cashierNav: NavItem[] = [
